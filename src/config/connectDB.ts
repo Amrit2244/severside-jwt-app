@@ -11,6 +11,7 @@ export async function connectDB (request:Request){
          })
          connection.on('error',(err)=>{
             console.error('error in connecting db',err);
+            process.exit(1)
             
          })
 
