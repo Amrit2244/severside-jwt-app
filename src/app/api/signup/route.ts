@@ -1,47 +1,55 @@
-import validateEmail from "@/helper/validateEmail";
-import validatePassword from "@/helper/validatePassword";
-import { connectDB } from "@/config/connectDB";
 import { User } from "@/models/User";
-import bcrypt from 'bcryptjs';
-import { useRouter } from "next/navigation";
+import bcrypt from "bcryptjs";
+import { connectDB } from "@/config/connectDB";
 
-export async function POST(request:Request){
-  
-    await connectDB(request);
+export async function POST(request: Request) {
+      await connectDB()
+    
+    try {
+        // Connect to the database
+        
 
-    try {  // distrct data from body
-        const body = await request.json();
-        const {email,password} = body;
-    
-        //validate data
-        if(!validateEmail(email)|| !validatePassword){
-            return new Response(JSON.stringify({Error:'Invalid Email or Password'}),{status:400});
+        // Extract data from the request
+        const { email, password } = await request.json();
+
+        // Validate the input
+        if (!email || !password) {
+            return new Response(
+                JSON.stringify({ error: "Email and password are required" }),
+                { status: 400 }
+            );
         }
-        const existingUser = await User.findOne({email})
-        if(!existingUser){
-            return new Response(JSON.stringify({message:'User alredy exists'}),{status:409});
+
+        // Check if the user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return new Response(
+                JSON.stringify({ error: "User already exists" }),
+                { status: 400 }
+            );
         }
-        //hash the password
-    
-        const hash = bcrypt.hash(password,8);
-    
-        //create new user
-    
+
+        // Hash the password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Create the new user
         const newUser = new User({
             email,
-            password:hash
-    
-        })
+            password: hashedPassword,
+        });
+
         await newUser.save();
-        console.log('User Save Success!!');
-        
-        return new Response(JSON.stringify({message:"new User saved Successfully",userId:newUser._id}),{status:201})
-    
-        
-    } catch (error : any) {
-        console.error('failed to create a new user',error.message);
-        return new Response(JSON.stringify({Error:'unable to create user',details:error.message}),{status:500});
-        
-        
+
+        // Return success response
+        return new Response(
+            JSON.stringify({ message: "Signup successful" }),
+            { status: 201 }
+        );
+    } catch (error) {
+        console.error(error);
+        return new Response(
+            JSON.stringify({ error: "Internal server error" }),
+            { status: 500 }
+        );
     }
-};
+}

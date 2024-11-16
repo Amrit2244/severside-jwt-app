@@ -1,11 +1,10 @@
 'use server'
 
-import { cookies } from 'next/headers';
-import {useRouter} from 'next/navigation';
+
 
 
 export default async function loginAction (currentState:any,formdata:FormData):Promise<string | undefined>{
-    const router = useRouter();
+  
     // to extract data from form
     const email = formdata.get('email');
     const password = formdata.get('password');
@@ -25,7 +24,7 @@ export default async function loginAction (currentState:any,formdata:FormData):P
     
 
     if(res.ok){
-        router.push('/protected')
+        
         console.error('Invalid Credential');
         
     }else {

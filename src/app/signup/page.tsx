@@ -1,25 +1,44 @@
-'use client';
+"use client";
 
-import { useFormState } from "react-dom";
-import signupAction from "@/app/signup/signupAction";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
-export default function Signup (){
-    const [error,formAction]= useFormState(signupAction,undefined);
-    return(
-        <>
-        <div>
-          <h1>SignUp Page</h1>
-            <form action={formAction}>
-                <input type="emial"name="email" id="email" placeholder="Enter the Email Id Please" />
-                <input type="password" name="password" id="password" placeholder="Enter The Password Please"/>
-                <button type="submit">SignUP</button>
-                </form>  
-                {error && <p style={{color:'red'}}>{error}</p>}                        
-        </div>
-        </>              
+export default function SignupPage() {
+    const router = useRouter();
+    const [error, setError] = useState<string | null>(null);
 
-    )
+    const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        const email = formData.get("email");
+        const password = formData.get("password");
+
+        try {
+            const res = await fetch("/api/signup", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email, password }),
+            });
+
+            if (res.ok) {
+                
+            } else {
+                const data = await res.json();
+                setError(data.error);
+            }
+        } catch (err) {
+            setError("Something went wrong");
+        }
+    };
+
+    return (
+        <form onSubmit={handleSubmit}>
+            <input type="email" name="email" placeholder="Enter your email" required />
+            <input type="password" name="password" placeholder="Enter your password" required />
+            <button type="submit">Sign Up</button>
+            {error && <p style={{ color: "red" }}>{error}</p>}
+        </form>
+    );
 }
-
-
- 

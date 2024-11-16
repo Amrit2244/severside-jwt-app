@@ -3,18 +3,16 @@ import validateEmail from "@/helper/validateEmail";
 import { User } from "@/models/User";
 import { connectDB } from "@/config/connectDB";
 import bcrypt, { compare } from 'bcryptjs';
-import { useRouter } from "next/navigation";
+
 import validatePassword from "@/helper/validatePassword";
 import jwt from 'jsonwebtoken';
-import { Sign } from "crypto";
 import { NextResponse } from "next/server";
-import path from "path";
-import { getMaxAge } from "next/dist/server/image-optimizer";
+
 
 export default async function (request:Request){
     // connect the Database 
-    await connectDB (request);
-    const router = useRouter();
+    await connectDB ();
+
     
     try {
         //extract data the from body
@@ -30,7 +28,7 @@ export default async function (request:Request){
         const user = await User.findOne({email})
         if(!user){
             return new Response(JSON.stringify({Error:'User not found'}),{status:400})
-            router.push('/protected')
+            
 
         }
         //compare the password
